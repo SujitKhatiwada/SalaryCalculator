@@ -1,4 +1,4 @@
-# Salary Calculator
+# Salary Calculator using HTML, CSS, JS, and Bootstrap
 
 ## Overview
 
