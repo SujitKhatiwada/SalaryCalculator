@@ -1,0 +1,140 @@
+using System;
+
+namespace PayrollApplication
+{
+    public class PayrollCalculator
+    {
+        private static void Main()
+        {
+            Console.WriteLine("----------------Welcome to the Payroll Application ------------ ");
+            Console.WriteLine();
+
+            //Get Information from the User
+            Employee employee = new Employee();
+            Console.WriteLine("Enter the Employee Name: ");
+            employee.Name = Console.ReadLine();
+
+            Console.WriteLine("Enter Gross Salary in CAD: ");
+            employee.GrossSalary = GetDecimalValue(Console.ReadLine());
+            Console.WriteLine("Enter Allowance Amount in CAD: ");
+            employee.Allowance = GetDecimalValue(Console.ReadLine());
+            Console.WriteLine("Enter Bonus Amount in CAD: ");
+            employee.Bonus = GetDecimalValue(Console.ReadLine());
+            Console.WriteLine("Enter Income Tax Rate in %: ");
+            employee.IncomeTaxRate = GetDecimalValue(Console.ReadLine());
+            Console.WriteLine("Enter Insurance Rate in %: ");
+            employee.InsuranceRate = GetDecimalValue(Console.ReadLine());
+            Console.WriteLine("Enter CPP Rate in %: ");
+            employee.CPPRate = GetDecimalValue(Console.ReadLine());
+            Console.WriteLine("Enter 'M' for Male and 'F' for Female: ");
+            employee.Gender = GetEnumByString(Console.ReadLine());
+            Console.WriteLine("Enter the Number of Dependents:");
+            employee.NoOfDependents = GetIntValue(Console.ReadLine());
+
+            //Calculate the Payroll
+            TaxResult result = TaxCalculation(employee);
+            
+            //Display the Payroll
+            Console.WriteLine();
+            Console.WriteLine("----------------Payroll Result ------------ ");
+            Console.WriteLine("Employee Name: " + result.EmployeeName);
+            Console.WriteLine("Gross Salary: " + result.GrossIncome);
+            Console.WriteLine("Deduction: " + result.Deduction);
+            Console.WriteLine("Addition: " + result.Addition);
+            Console.WriteLine("Net Salary: " + result.NetIncome);
+            Console.WriteLine();
+            Console.WriteLine("Press Any Key To Exit. ");
+            Console.ReadKey(true);
+        }
+
+        private static TaxResult TaxCalculation(Employee employee)
+        {
+            var newIncomeTaxRate = employee.IncomeTaxRate - ((employee.NoOfDependents - (employee.Gender == Gender.MALE ? 2 : 1)) / 100);
+            var deduction = (employee.GrossSalary * newIncomeTaxRate / 100) + (employee.GrossSalary * employee.CPPRate / 100) + (employee.GrossSalary * employee.InsuranceRate / 100);
+            var addition = employee.Allowance + employee.Bonus;
+
+            return new TaxResult()
+            {
+                EmployeeName = employee.Name,
+                GrossIncome = employee.GrossSalary,
+                Deduction = deduction,
+                Addition = addition,
+                NetIncome = (employee.GrossSalary - deduction) + addition
+            };
+        }
+
+        #region Models
+        private class Employee
+        {
+            public string Name { get; set; }
+            public decimal GrossSalary { get; set; }
+            public decimal Bonus { get; set; }
+            public decimal Allowance { get; set; }
+            public decimal IncomeTaxRate { get; set; }
+            public decimal InsuranceRate { get; set; }
+            public decimal CPPRate { get; set; }
+            public Gender Gender { get; set; }
+            public int NoOfDependents { get; set; }
+        }
+
+        private class TaxResult
+        {
+            public string EmployeeName { get; set; }
+            public decimal GrossIncome { get; set; }
+            public decimal Deduction { get; set; }
+            public decimal Addition { get; set; }
+            public decimal NetIncome { get; set; }
+        }
+
+        private enum Gender
+        {
+            MALE = 0,
+            FEMALE = 1
+        }
+        #endregion
+
+        #region Helper Methods
+
+        private static Gender GetEnumByString(string gender)
+        {
+            while (gender.ToLower() != "m" && gender.ToLower() != "f")
+            {
+                Console.WriteLine("Invalid Entry. Please Enter 'M' for Male and 'F' for Female");
+                gender = Console.ReadLine();
+            }
+            //
+            if (gender.ToLower() == "m")
+            {
+                return Gender.MALE;
+            }
+            else
+            {
+                return Gender.FEMALE;
+            }
+        }
+
+        private static decimal GetDecimalValue(string value)
+        {
+            decimal result;
+            while (!decimal.TryParse(value, out result))
+            {
+                Console.WriteLine("Invalid Entry. Please Enter a Valid Number: ");
+                value = Console.ReadLine();
+            }
+            return result;
+        }
+
+        private static int GetIntValue(string value)
+        {
+            int result;
+            while (!int.TryParse(value, out result))
+            {
+                Console.WriteLine("Invalid Entry. Please Enter a Valid Number: ");
+                value = Console.ReadLine();
+            }
+            return result;
+        }
+        #endregion
+
+    }
+}
